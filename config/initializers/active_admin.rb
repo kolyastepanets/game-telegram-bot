@@ -8,7 +8,7 @@ ActiveAdmin.setup do |config|
   config.root_to = 'games#index'
   config.before_action do
     authenticate_or_request_with_http_basic do |name, password|
-      name == "frodo" && password == "thering"
+      name == ENV['ADMIN_NAME'] && password == ENV['ADMIN_PASSWORD']
     end
   end
 end
