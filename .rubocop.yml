@@ -1,0 +1,17 @@
+inherit_from: .rubocop_todo.yml
+Documentation:
+  Enabled: false
+AllCops:
+  TargetRubyVersion: 2.4.1
+  Include:
+    - Rakefile
+    - config.ru
+    - lib/**/*.rake
+    - '**/Gemfile'
+  Exclude:
+    - db/schema.rb
+    - db/migrate/*.rb
+    - node_modules/**/*
+    - config/environments/*
+    - config/initializers/*
+    - db/seeds.rb

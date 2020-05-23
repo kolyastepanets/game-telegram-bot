@@ -1,0 +1,6 @@
+ignore_unreachable_actions:
+- ^ckeditor\/
+- ^admin\/
+- ^inherited_resources\/
+ignore_unused_routes:
+- ^admin\/

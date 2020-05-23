@@ -1,0 +1,18 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: game_tg_bot_development
+
+test:
+  <<: *default
+  database: game_tg_bot_test
+
+production:
+  <<: *default
+  database: game_tg_bot_production
+  username: game_tg_bot
+  password: <%= ENV['GAME_TG_BOT_DATABASE_PASSWORD'] %>
