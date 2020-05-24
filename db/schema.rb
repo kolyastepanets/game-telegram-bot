@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_05_24_114819) do
+ActiveRecord::Schema.define(version: 2020_05_23_114251) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,14 +31,14 @@ ActiveRecord::Schema.define(version: 2020_05_24_114819) do
   create_table "users", force: :cascade do |t|
     t.string "nickname"
     t.string "time_to_play"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
     t.integer "tg_id"
     t.string "tg_first_name"
     t.string "tg_last_name"
     t.string "tg_username"
     t.boolean "is_bot"
     t.string "tg_language_code"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
 
