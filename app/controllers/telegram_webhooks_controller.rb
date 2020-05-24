@@ -4,14 +4,13 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   before_action :init_user
 
   def start!(*)
-    # binding.pry
     text = "Выберите действие"
     begin
       respond_with(:message, text: text, reply_markup: {
         inline_keyboard: [
           [
             {text: 'Внести информацию', callback_data: 'add_user'},
-            {text: 'Найти игрока', callback_data: 'find_user'},
+            {text: 'Найти игрока', callback_data: 'find_user_to_play'},
           ]
         ],
       })
@@ -22,23 +21,16 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     end
   end
 
-  # def help!(*)
-  #   respond_with :message, text: t('help')
-  # end
-
-  # def message(*)
-  #   respond_with :message, text: t('help')
-  # end
-
   def callback_query(data)
-    # binding.pry
     case data
-    when 'find_user'
-      find_user
+    when 'find_user_to_play'
+      find_user_to_play
     when 'add_user'
       choose_favourite_game
     when *game_ids
       save_game_to_user(data)
+    when *choose_player
+      find_random_user(data)
     when *ranges
       save_time_slot_to_user(data)
     when *ranges_replies
@@ -86,6 +78,31 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   private
+
+  def find_user_to_play
+    respond_with(
+      :message,
+      text: "Ваша любимая игра?",
+      reply_markup: {
+        inline_keyboard: [
+          Game.all.map do |game|
+            { text: game.name, callback_data: "#{game.id} choose_player" }
+          end
+        ]
+      }
+    )
+  end
+
+  def find_random_user(data)
+    game_id = data.split(" ")[0]
+    user = User.joins(:games).where(games: { id: game_id} ).order(Arel.sql('RANDOM()')).first
+    text = "Ничего не найдено"
+    text = "Мой никнейм - #{user.nickname}. Я обычно играю: #{user.time_to_play}" if user
+    respond_with(
+      :message,
+      text: text,
+    )
+  end
 
   def save_time_slot_to_user(slot)
     @user.update(time_to_play: slot)
@@ -185,7 +202,6 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def ranges
-    # binding.pry
     @ranges ||= begin
       ra = (00..23).to_a
       ranges = []
@@ -202,5 +218,9 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def ranges_replies
     ["ranges_second_reply", "ranges_third_reply", "ranges_fourth_reply", "ranges_fifth_reply"]
+  end
+
+  def choose_player
+    game_ids.map { |game_id| "#{game_id} choose_player" }
   end
 end
