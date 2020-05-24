@@ -149,55 +149,68 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     @game_ids ||= Game.pluck(:id).map(&:to_s)
   end
 
-  def ranges_third_reply
+  def first_half_day
     [
       { text: "0 - 1", callback_data: "0 - 1" },
       { text: "1 - 2", callback_data: "1 - 2" },
       { text: "2 - 3", callback_data: "2 - 3" },
       { text: "3 - 4", callback_data: "3 - 4" },
-      { text: "4 - 5", callback_data: "4 - 5" },
-      { text: "еще показать", callback_data: "ranges_fourth_reply" }
+      { text: "еще", callback_data: "ranges_fourth_reply" }
     ]
   end
 
   def ranges_fourth_reply
     [
+      { text: "4 - 5", callback_data: "4 - 5" },
       { text: "5 - 6", callback_data: "5 - 6" },
       { text: "6 - 7", callback_data: "6 - 7" },
       { text: "7 - 8", callback_data: "7 - 8" },
-      { text: "8 - 9", callback_data: "8 - 9" },
-      { text: "9 - 10", callback_data: "9 - 10" },
-      { text: "еще показать", callback_data: "ranges_fifth_reply" }
+      { text: "еще", callback_data: "ranges_fifth_reply" }
     ]
   end
 
   def ranges_fifth_reply
     [
+      { text: "8 - 9", callback_data: "8 - 9" },
+      { text: "9 - 10", callback_data: "9 - 10" },
       { text: "10 - 11", callback_data: "10 - 11" },
       { text: "11 - 12", callback_data: "11 - 12" },
-      { text: "12 - 13", callback_data: "12 - 13" },
-      { text: "13 - 14", callback_data: "13 - 14" },
-      { text: "14 - 15", callback_data: "14 - 15" }
     ]
   end
 
   def ranges_first_reply
     [
+      { text: "00:00 - 12:00", callback_data: "first_half_day" },
+      { text: "13:00 - 23:59", callback_data: "last_half_day" },
+    ]
+  end
+
+  def last_half_day
+    [
+      { text: "12 - 13", callback_data: "12 - 13" },
+      { text: "13 - 14", callback_data: "13 - 14" },
+      { text: "14 - 15", callback_data: "14 - 15" },
       { text: "15 - 16", callback_data: "15 - 16" },
-      { text: "16 - 17", callback_data: "16 - 17" },
-      { text: "17 - 18", callback_data: "17 - 18" },
-      { text: "18 - 19", callback_data: "18 - 19" },
-      { text: "19 - 20", callback_data: "19 - 20" },
-      { text: "еще показать", callback_data: "ranges_second_reply" }
+      { text: "еще", callback_data: "ranges_second_reply" }
     ]
   end
 
   def ranges_second_reply
     [
+      { text: "16 - 17", callback_data: "16 - 17" },
+      { text: "17 - 18", callback_data: "17 - 18" },
+      { text: "18 - 19", callback_data: "18 - 19" },
+      { text: "19 - 20", callback_data: "19 - 20" },
+      { text: "еще", callback_data: "ranges_third_reply" }
+    ]
+  end
+
+  def ranges_third_reply
+    [
+      { text: "20 - 21", callback_data: "20 - 21" },
       { text: "21 - 22", callback_data: "21 - 22" },
       { text: "22 - 23", callback_data: "22 - 23" },
       { text: "23 - 00", callback_data: "23 - 00" },
-      { text: "еще показать", callback_data: "ranges_third_reply" }
     ]
   end
 
@@ -217,7 +230,10 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def ranges_replies
-    ["ranges_second_reply", "ranges_third_reply", "ranges_fourth_reply", "ranges_fifth_reply"]
+    [
+      "first_half_day", "last_half_day", "ranges_second_reply", "ranges_third_reply",
+      "ranges_fourth_reply", "ranges_fifth_reply"
+    ]
   end
 
   def choose_player
