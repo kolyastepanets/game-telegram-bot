@@ -12,6 +12,7 @@ gem 'turbolinks', '~> 5'
 gem 'jbuilder', '~> 2.7'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'activeadmin'
+gem 'telegram-bot'
 
 group :development do
   gem 'listen', '>= 3.0.5', '< 3.2'
