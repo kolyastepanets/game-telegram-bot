@@ -64,5 +64,5 @@ Rails.application.configure do
     Bullet.rails_logger = true
   end
   config.telegram_updates_controller.session_store = :file_store, {expires_in: 1.month}
-  config.hosts << "a7f137db.ngrok.io"
+  config.hosts << "4e7d481b.ngrok.io"
 end
