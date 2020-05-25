@@ -65,4 +65,5 @@ Rails.application.configure do
   end
   config.telegram_updates_controller.session_store = :file_store, {expires_in: 1.month}
   config.hosts << "00688ebd.ngrok.io"
+  config.active_job.queue_adapter = :sidekiq
 end

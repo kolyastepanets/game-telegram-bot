@@ -94,6 +94,7 @@ GEM
       descendants_tracker (~> 0.0.1)
     colorize (0.8.1)
     concurrent-ruby (1.1.6)
+    connection_pool (2.2.2)
     crass (1.0.6)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
@@ -204,6 +205,8 @@ GEM
     public_suffix (4.0.5)
     puma (3.12.6)
     rack (2.2.2)
+    rack-protection (2.0.8.1)
+      rack
     rack-proxy (0.6.5)
       rack
     rack-test (1.1.0)
@@ -252,6 +255,7 @@ GEM
     rb-fsevent (0.10.4)
     rb-inotify (0.10.1)
       ffi (~> 1.0)
+    redis (4.1.4)
     reek (6.0.0)
       kwalify (~> 0.7.0)
       parser (>= 2.5.0.0, < 2.8, != 2.5.1.1)
@@ -324,6 +328,11 @@ GEM
       sprockets-rails
       tilt
     sexp_processor (4.14.1)
+    sidekiq (6.0.7)
+      connection_pool (>= 2.2.2)
+      rack (~> 2.0)
+      rack-protection (>= 2.0.0)
+      redis (>= 4.1.0)
     simplecov (0.18.5)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -398,6 +407,7 @@ DEPENDENCIES
   rubocop
   rubycritic
   sass-rails (~> 5)
+  sidekiq
   simplecov
   simplecov-html
   simplecov-json
