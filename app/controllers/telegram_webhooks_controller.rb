@@ -2,15 +2,16 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
 
   before_action :init_user
+  before_action :load_application_texts
 
   def start!(*)
-    text = "Выберите действие"
+    text = find_text_by('choose_action')
     begin
       respond_with(:message, text: text, reply_markup: {
         inline_keyboard: [
           [
-            {text: 'Внести информацию', callback_data: 'add_user'},
-            {text: 'Найти игрока', callback_data: 'find_user_to_play'},
+            {text: find_text_by('enter_info'), callback_data: 'add_user'},
+            {text: find_text_by('find_user'), callback_data: 'find_user_to_play'},
           ]
         ],
       })
@@ -36,7 +37,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     when *ranges_replies
       respond_with(
         :message,
-        text: "Выберите время",
+        text: find_text_by('choose_time'),
         reply_markup: {
           inline_keyboard: [
             send(data).map do |time_slot|
@@ -58,7 +59,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       save_context :save_nickname!
       respond_with(
         :message,
-        text: "Ваш ник в игре?",
+        text: find_text_by('ask_for_nickname'),
       )
     end
   end
@@ -66,7 +67,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def save_time
     respond_with(
       :message,
-      text: "Когда вы обычно играете?",
+      text: find_text_by('ask_for_time_to_play'),
       reply_markup: {
         inline_keyboard: [
           ranges_first_reply.map do |time_slot|
@@ -82,7 +83,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def find_user_to_play
     respond_with(
       :message,
-      text: "Ваша любимая игра?",
+      text: find_text_by('question_favourite_game'),
       reply_markup: {
         inline_keyboard: [
           Game.all.map do |game|
@@ -100,14 +101,19 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
                .where(games: { id: game_id } )
                .order(Arel.sql('RANDOM()'))
                .first
-    text = "Ничего не найдено"
-    text = "Мой никнейм - #{user.nickname}. Я обычно играю: #{user.time_to_play}" if user
+    text = find_text_by('nothing_found')
+    if user
+      text = find_text_by('my_nickname')
+               .concat(user.nickname)
+               .concat(find_text_by('i_usually_play'))
+               .concat(user.time_to_play)
+    end
     respond_with(
       :message,
       text: text, reply_markup: {
         inline_keyboard: [
           [
-            { text: 'Повторить поиск', callback_data: 'find_user_to_play' },
+            { text: find_text_by('retry_search'), callback_data: 'find_user_to_play' },
           ]
         ],
       }
@@ -118,7 +124,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     @user.update(time_to_play: slot)
     respond_with(
       :message,
-      text: "Спасибо, данные сохранены! Начать сначала /start"
+      text: find_text_by('data_saved')
     )
   end
 
@@ -133,7 +139,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def choose_favourite_game
     respond_with(
       :message,
-      text: "Ваша любимая игра?",
+      text: find_text_by('question_favourite_game'),
       reply_markup: {
         inline_keyboard: [
           Game.all.map do |game|
@@ -202,5 +208,13 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def choose_player
     game_ids.map { |game_id| "#{game_id} choose_player" }
+  end
+
+  def load_application_texts
+    @application_texts ||= ApplicationText.all
+  end
+
+  def find_text_by(key)
+    @application_texts.find { |ap| ap.key == key }.text
   end
 end
