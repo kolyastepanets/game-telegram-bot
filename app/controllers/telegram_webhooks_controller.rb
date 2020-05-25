@@ -104,7 +104,13 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     text = "Мой никнейм - #{user.nickname}. Я обычно играю: #{user.time_to_play}" if user
     respond_with(
       :message,
-      text: text,
+      text: text, reply_markup: {
+        inline_keyboard: [
+          [
+            { text: 'Повторить поиск', callback_data: 'find_user_to_play' },
+          ]
+        ],
+      }
     )
   end
 
