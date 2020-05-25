@@ -95,7 +95,11 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def find_random_user(data)
     game_id = data.split(" ")[0]
-    user = User.joins(:games).where(games: { id: game_id} ).order(Arel.sql('RANDOM()')).first
+    user = User.where(time_to_play: @user.time_to_play)
+               .joins(:games)
+               .where(games: { id: game_id } )
+               .order(Arel.sql('RANDOM()'))
+               .first
     text = "Ничего не найдено"
     text = "Мой никнейм - #{user.nickname}. Я обычно играю: #{user.time_to_play}" if user
     respond_with(
