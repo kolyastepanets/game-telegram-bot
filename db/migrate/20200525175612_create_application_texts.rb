@@ -14,6 +14,7 @@ class CreateApplicationTexts < ActiveRecord::Migration[6.0]
     ApplicationText.create(text: "Ваш ник в игре?",          key: 'ask_for_nickname')
     ApplicationText.create(text: "Повторить поиск",          key: 'retry_search')
     ApplicationText.create(text: "Ваша любимая игра?",       key: 'question_favourite_game')
+    ApplicationText.create(text: "Выберите платформу",       key: 'choose_platform')
     ApplicationText.create(text: "Ничего не найдено",        key: 'nothing_found')
     ApplicationText.create(text: "Когда вы обычно играете?", key: 'ask_for_time_to_play')
     ApplicationText.create(text: "Мой никнейм - ",           key: 'my_nickname')

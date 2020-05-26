@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_05_25_185342) do
+ActiveRecord::Schema.define(version: 2020_05_26_185920) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,10 +33,17 @@ ActiveRecord::Schema.define(version: 2020_05_25_185342) do
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "platform_id"
   end
 
   create_table "messages", force: :cascade do |t|
     t.text "text"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
+  create_table "platforms", force: :cascade do |t|
+    t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
@@ -52,6 +59,7 @@ ActiveRecord::Schema.define(version: 2020_05_25_185342) do
     t.string "tg_language_code"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "has_blocked_bot", default: false
     t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
 

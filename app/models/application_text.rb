@@ -11,6 +11,7 @@ class ApplicationText < ApplicationRecord
     'ask_for_time_to_play',
     'my_nickname',
     'i_usually_play',
+    'choose_platform',
     'data_saved'
   ].freeze
 end

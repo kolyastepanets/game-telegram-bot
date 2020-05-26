@@ -4,7 +4,9 @@ ActiveAdmin.register Message do
   permit_params :text
 
   form do |f|
-    f.inputs :text
+    f.inputs do
+      f.input :text, hint: 'Сообщение асинхронно будет отправлено всем пользователям бота'
+    end
 
     f.actions
   end

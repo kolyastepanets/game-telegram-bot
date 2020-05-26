@@ -17,20 +17,24 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       })
     rescue Telegram::Bot::Forbidden => e
       puts "it is sad"
-      # user = User.find_by(uid: from[:id])
-      # user.update(has_blocked: true)
+      user = User.find_by(uid: from[:id])
+      user.update(has_blocked_bot: true)
     end
   end
 
   def callback_query(data)
     case data
     when 'find_user_to_play'
-      find_user_to_play
+      find_platform_to_play
     when 'add_user'
-      choose_favourite_game
-    when *game_ids
+      choose_favourite_platform
+    when /platform_id:/
+      choose_favourite_game(data)
+    when /game_id:/
       save_game_to_user(data)
-    when *choose_player
+    when *choose_platform
+      find_game_to_play(data)
+    when *choose_game
       find_random_user(data)
     when *ranges
       save_time_slot_to_user(data)
@@ -80,14 +84,30 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   private
 
-  def find_user_to_play
+  def find_platform_to_play
+    respond_with(
+      :message,
+      text: find_text_by('choose_platform'),
+      reply_markup: {
+        inline_keyboard: [
+          Platform.all.map do |platform|
+            { text: platform.name, callback_data: "#{platform.id} choose_platform" }
+          end
+        ]
+      }
+    )
+  end
+
+  def find_game_to_play(data)
+    platform_id = data.split(" ")[0]
+
     respond_with(
       :message,
       text: find_text_by('question_favourite_game'),
       reply_markup: {
         inline_keyboard: [
-          Game.all.map do |game|
-            { text: game.name, callback_data: "#{game.id} choose_player" }
+          Game.where(platform_id: platform_id).map do |game|
+            { text: game.name, callback_data: "#{game.id} choose_game" }
           end
         ]
       }
@@ -128,7 +148,9 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     )
   end
 
-  def save_game_to_user(game_id)
+  def save_game_to_user(data_game_id)
+    game_id = data_game_id.split(" ")[1]
+
     current_game = Game.find_by(id: game_id)
     if GameUser.where(game_id: current_game.id, user_id: @user.id).blank?
       GameUser.create(user_id: @user.id, game_id: current_game.id)
@@ -136,14 +158,29 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     save_nickname!
   end
 
-  def choose_favourite_game
+  def choose_favourite_platform
+    respond_with(
+      :message,
+      text: find_text_by('choose_platform'),
+      reply_markup: {
+        inline_keyboard: [
+          Platform.all.map do |platform|
+            { text: platform.name, callback_data: "platform_id: #{platform.id}" }
+          end
+        ]
+      }
+    )
+  end
+
+  def choose_favourite_game(data_platform_id)
+    platform_id = data_platform_id.split(" ")[1]
     respond_with(
       :message,
       text: find_text_by('question_favourite_game'),
       reply_markup: {
         inline_keyboard: [
-          Game.all.map do |game|
-            { text: game.name, callback_data: game.id }
+          Game.where(platform_id: platform_id).map do |game|
+            { text: game.name, callback_data: "game_id: #{game.id}" }
           end
         ]
       }
@@ -163,6 +200,10 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def game_ids
     @game_ids ||= Game.pluck(:id).map(&:to_s)
+  end
+
+  def platform_ids
+    @platform_ids ||= Platform.pluck(:id).map(&:to_s)
   end
 
   def ranges_first_reply
@@ -206,8 +247,12 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     ]
   end
 
-  def choose_player
-    game_ids.map { |game_id| "#{game_id} choose_player" }
+  def choose_platform
+    platform_ids.map { |platform_id| "#{platform_id} choose_platform" }
+  end
+
+  def choose_game
+    game_ids.map { |game_id| "#{game_id} choose_game" }
   end
 
   def load_application_texts
