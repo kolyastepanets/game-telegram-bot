@@ -12,8 +12,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       respond_with(:message, text: text, reply_markup: {
         inline_keyboard: [
           [
-            {text: find_text_by('enter_info'), callback_data: 'add_user'},
-            {text: find_text_by('find_user'), callback_data: 'find_user_to_play'},
+            { text: find_text_by('enter_info'), callback_data: 'add_user' },
+            { text: find_text_by('find_user'),  callback_data: 'find_user_to_play' },
           ]
         ],
       })
@@ -28,22 +28,16 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     case data
     when 'start_again'
       start!
-    when 'find_user_to_play'
-      find_platform_to_play
+
+    # enter info scenario
     when 'add_user'
       choose_favourite_platform
     when /platform_id:/
       choose_favourite_game(data)
-    when /offset|platform_id/
+    when /choose_favourite_game/
       choose_more_favourite_game(data)
     when /game_id:/
       save_game_to_user(data)
-    when *choose_platform
-      find_game_to_play(data)
-    when *choose_game
-      find_random_user(data)
-    when *ranges
-      save_time_slot_to_user(data)
     when *ranges_replies
       respond_with(
         :message,
@@ -56,6 +50,18 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
           ]
         }
       )
+    when *ranges
+      save_time_slot_to_user(data)
+
+    # find user to play scenario
+    when 'find_user_to_play'
+      find_platform_to_play
+    when *choose_platform
+      find_game_to_play(data)
+    when /more_find_game_to_play/
+      more_find_game_to_play(data)
+    when *choose_game
+      find_random_user(data)
     else
       # return help
     end
@@ -112,12 +118,50 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       text: find_text_by('question_favourite_game'),
       reply_markup: {
         inline_keyboard: [
-          Game.where(platform_id: platform_id).map do |game|
+          Game.where(platform_id: platform_id).offset(DEFAULT_OFFSET).limit(show_games_at_a_time).map do |game|
             { text: game.name, callback_data: "#{game.id} choose_game" }
-          end
+          end.push({ text: "еще", callback_data: "offset #{DEFAULT_OFFSET} platform_id #{platform_id} more_find_game_to_play" })
         ]
       }
     )
+  end
+
+  def more_find_game_to_play(data)
+    offset      = data.split(" ")[1].to_i + show_games_at_a_time
+    platform_id = data.split(" ")[3].to_i
+
+    games = Game.where(platform_id: platform_id).offset(offset).limit(show_games_at_a_time)
+
+    if games.size == show_games_at_a_time
+      respond_with(
+        :message,
+        text: find_text_by('question_favourite_game'),
+        reply_markup: {
+          inline_keyboard: [
+            games.map do |game|
+              { text: game.name, callback_data: "#{game.id} choose_game" }
+            end.push({ text: "еще", callback_data: "offset #{offset} platform_id #{platform_id} more_find_game_to_play" })
+          ]
+        }
+      )
+    elsif games.size > 0 && games.size < show_games_at_a_time
+      respond_with(
+        :message,
+        text: find_text_by('question_favourite_game'),
+        reply_markup: {
+          inline_keyboard: [
+            games.map do |game|
+              { text: game.name, callback_data: "#{game.id} choose_game" }
+            end
+          ]
+        }
+      )
+    else
+      respond_with(
+        :message,
+        text: find_text_by('no_more_games')
+      )
+    end
   end
 
   def find_random_user(data)
@@ -189,7 +233,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
         inline_keyboard: [
           Game.where(platform_id: platform_id).offset(DEFAULT_OFFSET).limit(show_games_at_a_time).map do |game|
             { text: game.name, callback_data: "game_id: #{game.id}" }
-          end.push({ text: "еще", callback_data: "offset #{DEFAULT_OFFSET} platform_id #{platform_id}" })
+          end.push({ text: "еще", callback_data: "offset #{DEFAULT_OFFSET} platform_id #{platform_id} choose_favourite_game" })
         ]
       }
     )
@@ -209,7 +253,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
           inline_keyboard: [
             games.map do |game|
               { text: game.name, callback_data: "game_id: #{game.id}" }
-            end.push({ text: "еще", callback_data: "offset #{offset} platform_id #{platform_id}" })
+            end.push({ text: "еще", callback_data: "offset #{offset} platform_id #{platform_id} choose_favourite_game" })
           ]
         }
       )
