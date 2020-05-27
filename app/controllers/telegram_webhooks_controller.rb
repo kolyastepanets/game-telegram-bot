@@ -2,7 +2,6 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
 
   DEFAULT_OFFSET = 0
-  DEFAULT_LIMIT  = 4
 
   before_action :init_user
   before_action :load_application_texts
@@ -188,7 +187,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       text: find_text_by('question_favourite_game'),
       reply_markup: {
         inline_keyboard: [
-          Game.where(platform_id: platform_id).offset(DEFAULT_OFFSET).limit(DEFAULT_LIMIT).map do |game|
+          Game.where(platform_id: platform_id).offset(DEFAULT_OFFSET).limit(show_games_at_a_time).map do |game|
             { text: game.name, callback_data: "game_id: #{game.id}" }
           end.push({ text: "еще", callback_data: "offset #{DEFAULT_OFFSET} platform_id #{platform_id}" })
         ]
@@ -197,12 +196,12 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   end
 
   def choose_more_favourite_game(data)
-    offset      = data.split(" ")[1].to_i + 4
+    offset      = data.split(" ")[1].to_i + show_games_at_a_time
     platform_id = data.split(" ")[3].to_i
 
-    games = Game.where(platform_id: platform_id).offset(offset).limit(DEFAULT_LIMIT)
+    games = Game.where(platform_id: platform_id).offset(offset).limit(show_games_at_a_time)
 
-    if games.size == 4
+    if games.size == show_games_at_a_time
       respond_with(
         :message,
         text: find_text_by('question_favourite_game'),
@@ -214,7 +213,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
           ]
         }
       )
-    elsif games.size > 0 && games.size < 4
+    elsif games.size > 0 && games.size < show_games_at_a_time
       respond_with(
         :message,
         text: find_text_by('question_favourite_game'),
@@ -310,8 +309,11 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
     @application_texts.find { |ap| ap.key == key }.text
   end
 
+  def show_games_at_a_time
+    ApplicationText.find_by(key: 'show_games_at_a_time').text.to_i
+  end
+
   def platform_
     Game.where(platform_id: platform_id)
   end
-
 end

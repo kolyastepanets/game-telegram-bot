@@ -13,6 +13,8 @@ class ApplicationText < ApplicationRecord
     'i_usually_play',
     'choose_platform',
     'start_again',
+    'no_more_games',
+    'show_games_at_a_time',
     'data_saved'
   ].freeze
 end
