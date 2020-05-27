@@ -1,6 +1,9 @@
 class TelegramWebhooksController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
 
+  DEFAULT_OFFSET = 0
+  DEFAULT_LIMIT  = 4
+
   before_action :init_user
   before_action :load_application_texts
 
@@ -32,6 +35,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       choose_favourite_platform
     when /platform_id:/
       choose_favourite_game(data)
+    when /offset|platform_id/
+      choose_more_favourite_game(data)
     when /game_id:/
       save_game_to_user(data)
     when *choose_platform
@@ -177,17 +182,56 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def choose_favourite_game(data_platform_id)
     platform_id = data_platform_id.split(" ")[1]
+
     respond_with(
       :message,
       text: find_text_by('question_favourite_game'),
       reply_markup: {
         inline_keyboard: [
-          Game.where(platform_id: platform_id).map do |game|
+          Game.where(platform_id: platform_id).offset(DEFAULT_OFFSET).limit(DEFAULT_LIMIT).map do |game|
             { text: game.name, callback_data: "game_id: #{game.id}" }
-          end
+          end.push({ text: "еще", callback_data: "offset #{DEFAULT_OFFSET} platform_id #{platform_id}" })
         ]
       }
     )
+  end
+
+  def choose_more_favourite_game(data)
+    offset      = data.split(" ")[1].to_i + 4
+    platform_id = data.split(" ")[3].to_i
+
+    games = Game.where(platform_id: platform_id).offset(offset).limit(DEFAULT_LIMIT)
+
+    if games.size == 4
+      respond_with(
+        :message,
+        text: find_text_by('question_favourite_game'),
+        reply_markup: {
+          inline_keyboard: [
+            games.map do |game|
+              { text: game.name, callback_data: "game_id: #{game.id}" }
+            end.push({ text: "еще", callback_data: "offset #{offset} platform_id #{platform_id}" })
+          ]
+        }
+      )
+    elsif games.size > 0 && games.size < 4
+      respond_with(
+        :message,
+        text: find_text_by('question_favourite_game'),
+        reply_markup: {
+          inline_keyboard: [
+            games.map do |game|
+              { text: game.name, callback_data: "game_id: #{game.id}" }
+            end
+          ]
+        }
+      )
+    else
+      respond_with(
+        :message,
+        text: find_text_by('no_more_games')
+      )
+    end
   end
 
   def init_user
@@ -265,4 +309,9 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
   def find_text_by(key)
     @application_texts.find { |ap| ap.key == key }.text
   end
+
+  def platform_
+    Game.where(platform_id: platform_id)
+  end
+
 end
