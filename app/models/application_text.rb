@@ -12,6 +12,7 @@ class ApplicationText < ApplicationRecord
     'my_nickname',
     'i_usually_play',
     'choose_platform',
+    'start_again',
     'data_saved'
   ].freeze
 end

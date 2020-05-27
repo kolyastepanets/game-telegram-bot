@@ -17,13 +17,15 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       })
     rescue Telegram::Bot::Forbidden => e
       puts "it is sad"
-      user = User.find_by(uid: from[:id])
+      user = User.find_by(tg_id: from[:id])
       user.update(has_blocked_bot: true)
     end
   end
 
   def callback_query(data)
     case data
+    when 'start_again'
+      start!
     when 'find_user_to_play'
       find_platform_to_play
     when 'add_user'
@@ -134,6 +136,7 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
         inline_keyboard: [
           [
             { text: find_text_by('retry_search'), callback_data: 'find_user_to_play' },
+            { text: find_text_by('start_again'),  callback_data: 'start_again' },
           ]
         ],
       }

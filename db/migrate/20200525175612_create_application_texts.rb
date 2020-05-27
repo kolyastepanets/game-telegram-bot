@@ -19,6 +19,7 @@ class CreateApplicationTexts < ActiveRecord::Migration[6.0]
     ApplicationText.create(text: "Когда вы обычно играете?", key: 'ask_for_time_to_play')
     ApplicationText.create(text: "Мой никнейм - ",           key: 'my_nickname')
     ApplicationText.create(text: ". Я обычно играю: ",       key: 'i_usually_play')
+    ApplicationText.create(text: "На главную",               key: 'start_again')
     ApplicationText.create(text: "Спасибо, данные сохранены! Начать сначала /start", key: 'data_saved')
   end
 end
