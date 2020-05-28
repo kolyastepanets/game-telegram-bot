@@ -6,9 +6,10 @@ class CreatePlatforms < ActiveRecord::Migration[6.0]
       t.timestamps
     end
 
-    Platform.create(name: "ps4")
-    Platform.create(name: "Xbox")
+    Platform.create(name: "PS4")
+    Platform.create(name: "Xbox One")
     Platform.create(name: "PC")
-    Platform.create(name: "mobile")
+    Platform.create(name: "Switch")
+    Platform.create(name: "Mobile")
   end
 end

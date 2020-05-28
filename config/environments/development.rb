@@ -64,6 +64,6 @@ Rails.application.configure do
     Bullet.rails_logger = true
   end
   config.telegram_updates_controller.session_store = :file_store, {expires_in: 1.month}
-  config.hosts << "56573f3e.ngrok.io"
+  config.hosts << "0b7e0a12f261.ngrok.io"
   config.active_job.queue_adapter = :sidekiq
 end
