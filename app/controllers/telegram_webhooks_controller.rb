@@ -204,7 +204,6 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
       tg_first_name: from[:first_name],
       tg_last_name: from[:last_name],
       tg_username: from[:username],
-      tg_language_code: from[:language_code],
       is_bot: from[:is_bot]
     )
   end
