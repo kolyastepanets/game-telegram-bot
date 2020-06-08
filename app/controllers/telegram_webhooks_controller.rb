@@ -124,8 +124,8 @@ class TelegramWebhooksController < Telegram::Bot::UpdatesController
 
   def find_random_user(data)
     game_id = data.split(" ")[0]
-    user = User.where(time_to_play: @user.time_to_play)
-               .where.not(id: @user.id)
+
+    user = User.where.not(id: @user.id)
                .joins(:games)
                .where(games: { id: game_id } )
                .order(Arel.sql('RANDOM()'))
